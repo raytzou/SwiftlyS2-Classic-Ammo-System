@@ -37,7 +37,7 @@ namespace ClassicAmmoSystem
         {
             ServiceCollection services = new();
 
-            services.AddSwiftly(Core).AddOptionsWithValidateOnStart<Config>().BindConfiguration("Main");
+            services.AddSwiftly(Core).AddOptionsWithValidateOnStart<Config>().BindConfiguration("WeaponAmmo");
             services.AddSingleton<IAmmoService, AmmoService>();
             _serviceProvider = services.BuildServiceProvider();
         }
