@@ -113,7 +113,7 @@ namespace ClassicAmmoSystem.Services
         public void SetAmmoAmount(CCSWeaponBase weaponBase, int amount)
         {
             if (!IsWeaponBaseValid(weaponBase))
-                throw new InvalidOperationException("Weapon Base is invalid");
+                throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
 
             weaponBase.Clip1 = amount;
             weaponBase.WeaponBaseVData.MaxClip1 = amount;
@@ -123,7 +123,7 @@ namespace ClassicAmmoSystem.Services
         public void SetReserveAmmoAmount(CCSWeaponBase weaponBase, int amount)
         {
             if (!IsWeaponBaseValid(weaponBase))
-                throw new InvalidOperationException("Weapon Base is invalid");
+                throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
 
             weaponBase.ReserveAmmo[0] = amount;
             weaponBase.WeaponBaseVData.PrimaryReserveAmmoMax = amount;
