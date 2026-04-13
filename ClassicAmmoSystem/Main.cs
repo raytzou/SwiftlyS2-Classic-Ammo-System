@@ -59,42 +59,10 @@ namespace ClassicAmmoSystem
             Core.Scheduler.NextWorldUpdate(() =>
             {
                 var weaponBase = instance.As<CCSWeaponBase>();
-
-                switch (designName)
-                {
-                    case "weapon_m4a1":
-                        {
-                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
-                            if (itemIndex == 60)
-                                designName = "weapon_m4a1_silencer";
-                            break;
-                        }
-                    case "weapon_hkp2000":
-                        {
-                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
-                            if (itemIndex == 61)
-                                designName = "weapon_usp_silencer";
-                            break;
-                        }
-                    case "weapon_mp7":
-                        {
-                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
-                            if (itemIndex == 23)
-                                designName = "weapon_mp5sd";
-                            break;
-                        }
-                    case "weapon_deagle":
-                        {
-                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
-                            if (itemIndex == 64)
-                                designName = "weapon_revolver";
-                            break;
-                        }
-                }
-
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
-                var ammoAmount = ammoService.GetAmmoAmount(designName);
-                var reserveAmmoAmount = ammoService.GetReserveAmmoAmount(designName);
+                var weaponEntityName = ammoService.GetWeaponEntityName(weaponBase);
+                var ammoAmount = ammoService.GetAmmoAmount(weaponEntityName);
+                var reserveAmmoAmount = ammoService.GetReserveAmmoAmount(weaponEntityName);
 
                 if (ammoAmount != null)
                     ammoService.SetAmmoAmount(weaponBase, ammoAmount.Value);

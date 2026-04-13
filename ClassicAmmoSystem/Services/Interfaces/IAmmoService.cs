@@ -35,5 +35,16 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// <returns>The number of reserve ammunition units available for the specified weapon. Returns 0 if the weapon has no
         /// reserve ammunition or is not found.</returns>
         public int? GetReserveAmmoAmount(string weaponEntityName);
+
+        /// <summary>
+        /// Gets the entity name for the specified weapon, mapping certain weapon and item index combinations to their
+        /// alternate entity names.
+        /// </summary>
+        /// <remarks>This method maps certain weapons to alternate entity names based on their designer
+        /// name and item definition index. For all other weapons, the original designer name is returned.</remarks>
+        /// <param name="weaponBase">The weapon instance for which to retrieve the entity name. Must not be null.</param>
+        /// <returns>The entity name corresponding to the weapon. For specific weapon and item index combinations, returns an
+        /// alternate entity name; otherwise, returns the weapon's designer name.</returns>
+        public string GetWeaponEntityName(CCSWeaponBase weaponBase);
     }
 }

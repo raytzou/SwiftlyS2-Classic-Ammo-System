@@ -134,6 +134,21 @@ namespace ClassicAmmoSystem.Services
 
         public int? GetReserveAmmoAmount(string weaponEntityName) => _weaponReserveAmmo.TryGetValue(weaponEntityName, out var amount) ? amount : null;
 
+        public string GetWeaponEntityName(CCSWeaponBase weaponBase)
+        {
+            var designName = weaponBase.DesignerName;
+            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
+
+            return (designName, itemIndex) switch
+            {
+                ("weapon_m4a1", 60) => "weapon_m4a1_silencer",
+                ("weapon_hkp2000", 61) => "weapon_usp_silencer",
+                ("weapon_mp7", 23) => "weapon_mp5sd",
+                ("weapon_deagle", 64) => "weapon_revolver",
+                _ => designName
+            };
+        }
+
         private bool IsWeaponBaseValid([NotNullWhen(true)] CCSWeaponBase weaponBase) =>
             weaponBase is not null && weaponBase.IsValidEntity && weaponBase.IsValid;
     }
