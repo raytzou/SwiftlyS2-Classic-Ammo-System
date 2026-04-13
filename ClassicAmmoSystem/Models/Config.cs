@@ -36,9 +36,9 @@ public class ReserveAmmoConfig
 
     public int Glock18 { get; set; } = 120;
     public int P2000 { get; set; } = 52;
-    public int USPS { get; set; } = 24;
+    public int USPS { get; set; } = 100;
     public int DualBerettas { get; set; } = 120;
-    public int P250 { get; set; } = 26;
+    public int P250 { get; set; } = 52;
     public int FiveSeven { get; set; } = 100;
     public int Tec9 { get; set; } = 90;
     public int CZ75Auto { get; set; } = 36;
