@@ -1,9 +1,11 @@
-﻿using ClassicAmmoSystem.Models;
+﻿using ClassicAmmoSystem.Services;
+using ClassicAmmoSystem.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.Plugins;
+using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace ClassicAmmoSystem
 {
@@ -18,11 +20,12 @@ namespace ClassicAmmoSystem
         {
             RegisterServices();
             RegisterEvents();
-            Core.Configuration.InitializeJsonWithModel<Config>("config.jsonc", "Main")
+            Core.Configuration.InitializeJsonWithModel<Config>("config.jsonc", "WeaponAmmo")
                 .Configure(builder =>
                 {
                     builder.AddJsonFile("config.jsonc", optional: false, reloadOnChange: true);
                 });
+            _serviceProvider?.GetRequiredService<IAmmoService>().Initialize();
         }
 
         public override void Unload()
@@ -35,6 +38,7 @@ namespace ClassicAmmoSystem
             ServiceCollection services = new();
 
             services.AddSwiftly(Core).AddOptionsWithValidateOnStart<Config>().BindConfiguration("Main");
+            services.AddSingleton<IAmmoService, AmmoService>();
             _serviceProvider = services.BuildServiceProvider();
         }
 
@@ -45,7 +49,58 @@ namespace ClassicAmmoSystem
 
         private void OnEntityCreated(IOnEntityCreatedEvent @event)
         {
-            throw new NotImplementedException();
+            if (_serviceProvider is null)
+                throw new InvalidOperationException("Service Provider is null.");
+
+            var instance = @event.Entity;
+            var designName = instance.DesignerName;
+            if (instance is null || !instance.IsValidEntity || !designName.StartsWith("weapon_")) return;
+
+            Core.Scheduler.NextWorldUpdate(() =>
+            {
+                var weaponBase = instance.As<CCSWeaponBase>();
+
+                switch (designName)
+                {
+                    case "weapon_m4a1":
+                        {
+                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
+                            if (itemIndex == 60)
+                                designName = "weapon_m4a1_silencer";
+                            break;
+                        }
+                    case "weapon_hkp2000":
+                        {
+                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
+                            if (itemIndex == 61)
+                                designName = "weapon_usp_silencer";
+                            break;
+                        }
+                    case "weapon_mp7":
+                        {
+                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
+                            if (itemIndex == 23)
+                                designName = "weapon_mp5sd";
+                            break;
+                        }
+                    case "weapon_deagle":
+                        {
+                            var itemIndex = weaponBase.AttributeManager.Item.ItemDefinitionIndex;
+                            if (itemIndex == 64)
+                                designName = "weapon_revolver";
+                            break;
+                        }
+                }
+
+                var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+                var ammoAmount = ammoService.GetAmmoAmount(designName);
+                var reserveAmmoAmount = ammoService.GetReserveAmmoAmount(designName);
+
+                if (ammoAmount != null)
+                    ammoService.SetAmmoAmount(weaponBase, ammoAmount.Value);
+                if (reserveAmmoAmount != null)
+                    ammoService.SetReserveAmmoAmount(weaponBase, reserveAmmoAmount.Value);
+            });
         }
     }
 }
