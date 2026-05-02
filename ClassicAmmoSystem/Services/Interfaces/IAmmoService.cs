@@ -46,5 +46,17 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// <returns>The entity name corresponding to the weapon. For specific weapon and item index combinations, returns an
         /// alternate entity name; otherwise, returns the weapon's designer name.</returns>
         public string GetWeaponEntityName(CCSWeaponBase weaponBase);
+
+        /// <summary>
+        /// Reloads the specified weapon by transferring available reserve ammunition to the weapon's clip, up to the
+        /// clip's maximum capacity.
+        /// </summary>
+        /// <remarks>If the total available ammunition is less than the clip's maximum capacity, all
+        /// remaining ammunition is loaded into the clip and the reserve is set to zero. Otherwise, the clip is filled
+        /// to its maximum and the remaining ammunition stays in reserve.</remarks>
+        /// <param name="weaponBase">The weapon instance to reload. Must represent a valid weapon and contain information about current and
+        /// reserve ammunition.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the specified weapon is not valid.</exception>
+        public void ReloadWeapon(CCSWeaponBase weaponBase);
     }
 }

@@ -15,6 +15,7 @@ namespace ClassicAmmoSystem.Services
 
         private Dictionary<string, int> _weaponReserveAmmo = [];
         private Dictionary<string, int> _weaponAmmo = [];
+        private Dictionary<string, float> _weaponReloadTime = [];
 
         public AmmoService(ISwiftlyCore core, IOptionsMonitor<Config> config, ILogger<AmmoService> logger)
         {
@@ -108,6 +109,44 @@ namespace ClassicAmmoSystem.Services
                 ["weapon_deagle"] = _config.CurrentValue.Ammo.DesertEagle,
                 ["weapon_revolver"] = _config.CurrentValue.Ammo.Revolver
             };
+
+            _weaponReloadTime = new()
+            {
+                ["weapon_m249"] = _config.CurrentValue.ReloadTime.M249,
+                ["weapon_negev"] = _config.CurrentValue.ReloadTime.Negev,
+
+                ["weapon_ak47"] = _config.CurrentValue.ReloadTime.AK47,
+                ["weapon_m4a1"] = _config.CurrentValue.ReloadTime.M4A4,
+                ["weapon_m4a1_silencer"] = _config.CurrentValue.ReloadTime.M4A1S,
+                ["weapon_aug"] = _config.CurrentValue.ReloadTime.AUG,
+                ["weapon_sg556"] = _config.CurrentValue.ReloadTime.SG553,
+                ["weapon_famas"] = _config.CurrentValue.ReloadTime.FAMAS,
+                ["weapon_galilar"] = _config.CurrentValue.ReloadTime.GalilAR,
+
+                ["weapon_awp"] = _config.CurrentValue.ReloadTime.AWP,
+                ["weapon_ssg08"] = _config.CurrentValue.ReloadTime.SSG08,
+                ["weapon_scar20"] = _config.CurrentValue.ReloadTime.SCAR20,
+                ["weapon_g3sg1"] = _config.CurrentValue.ReloadTime.G3SG1,
+
+                ["weapon_mac10"] = _config.CurrentValue.ReloadTime.MAC10,
+                ["weapon_mp9"] = _config.CurrentValue.ReloadTime.MP9,
+                ["weapon_mp7"] = _config.CurrentValue.ReloadTime.MP7,
+                ["weapon_mp5sd"] = _config.CurrentValue.ReloadTime.MP5SD,
+                ["weapon_ump45"] = _config.CurrentValue.ReloadTime.UMP45,
+                ["weapon_p90"] = _config.CurrentValue.ReloadTime.P90,
+                ["weapon_bizon"] = _config.CurrentValue.ReloadTime.Bizon,
+
+                ["weapon_glock"] = _config.CurrentValue.ReloadTime.Glock18,
+                ["weapon_hkp2000"] = _config.CurrentValue.ReloadTime.P2000,
+                ["weapon_usp_silencer"] = _config.CurrentValue.ReloadTime.USPS,
+                ["weapon_elite"] = _config.CurrentValue.ReloadTime.DualBerettas,
+                ["weapon_p250"] = _config.CurrentValue.ReloadTime.P250,
+                ["weapon_fiveseven"] = _config.CurrentValue.ReloadTime.FiveSeven,
+                ["weapon_tec9"] = _config.CurrentValue.ReloadTime.Tec9,
+                ["weapon_cz75a"] = _config.CurrentValue.ReloadTime.CZ75Auto,
+                ["weapon_deagle"] = _config.CurrentValue.ReloadTime.DesertEagle,
+                ["weapon_revolver"] = _config.CurrentValue.ReloadTime.Revolver
+            };
         }
 
         public void SetAmmoAmount(CCSWeaponBase weaponBase, int amount)
@@ -149,7 +188,50 @@ namespace ClassicAmmoSystem.Services
             };
         }
 
+
+        public void ReloadWeapon(CCSWeaponBase weaponBase)
+        {
+            if (!IsWeaponBaseValid(weaponBase))
+                throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
+
+            var weaponEntityName = GetWeaponEntityName(weaponBase);
+
+            if (IsShotgunWithoutMagzine(weaponEntityName))
+                return;
+
+            var currentAmmoAmount = weaponBase.Clip1;
+            var currentReserveAmmoAmount = weaponBase.ReserveAmmo[0];
+            var clipMaxAmount = GetAmmoAmount(weaponEntityName);
+            var reloadTime = GetReloadTime(weaponEntityName);
+
+            if (clipMaxAmount is null)
+                return;
+
+            var totalAmmo = currentAmmoAmount + currentReserveAmmoAmount;
+            var finalClipAmount = Math.Min(totalAmmo, clipMaxAmount.Value);
+            var finalReserveAmount = Math.Max(0, totalAmmo - clipMaxAmount.Value);
+
+            _core.Scheduler.DelayBySeconds(reloadTime, () =>
+            {
+                _core.Scheduler.NextWorldUpdate(() =>
+                {
+                    SetAmmoAmount(weaponBase, finalClipAmount);
+                    SetReserveAmmoAmount(weaponBase, finalReserveAmount);
+                });
+            });
+        }
+
+        private float GetReloadTime(string weaponEntityName) =>
+            _weaponReloadTime.TryGetValue(weaponEntityName, out var reloadTime) ? reloadTime : 2f;
+
         private bool IsWeaponBaseValid([NotNullWhen(true)] CCSWeaponBase weaponBase) =>
             weaponBase is not null && weaponBase.IsValidEntity && weaponBase.IsValid;
+
+        private bool IsShotgunWithoutMagzine(string weaponEntityName)
+        {
+            var shotguns = new HashSet<string> { "weapon_nova", "weapon_xm1014", "weapon_sawedoff" };
+
+            return shotguns.Contains(weaponEntityName);
+        }
     }
 }
