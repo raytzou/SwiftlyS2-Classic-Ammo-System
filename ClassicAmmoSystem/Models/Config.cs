@@ -2,6 +2,7 @@
 {
     public ReserveAmmoConfig ReserveAmmo { get; set; } = new();
     public AmmoConfig Ammo { get; set; } = new();
+    public ReloadTimeConfig ReloadTime { get; set; } = new();
 }
 
 public class ReserveAmmoConfig
@@ -86,4 +87,42 @@ public class AmmoConfig
     public int CZ75Auto { get; set; } = 12;
     public int DesertEagle { get; set; } = 7;
     public int Revolver { get; set; } = 8;
+}
+
+public class ReloadTimeConfig
+{
+    public float M249 { get; set; } = 5.7f;
+    public float Negev { get; set; } = 5.7f;
+
+    public float AK47 { get; set; } = 2.4f;
+    public float M4A4 { get; set; } = 3.1f;
+    public float M4A1S { get; set; } = 3.1f;
+    public float AUG { get; set; } = 3.8f;
+    public float SG553 { get; set; } = 2.8f;
+    public float FAMAS { get; set; } = 3.3f;
+    public float GalilAR { get; set; } = 3.0f;
+
+    public float AWP { get; set; } = 3.7f;
+    public float SSG08 { get; set; } = 3.7f;
+    public float SCAR20 { get; set; } = 3.1f;
+    public float G3SG1 { get; set; } = 4.7f;
+
+    public float MAC10 { get; set; } = 2.6f;
+    public float MP9 { get; set; } = 2.1f;
+    public float MP7 { get; set; } = 3.1f;
+    public float MP5SD { get; set; } = 3.1f;
+    public float UMP45 { get; set; } = 3.5f;
+    public float P90 { get; set; } = 3.3f;
+    public float Bizon { get; set; } = 2.43f;
+
+    public float Glock18 { get; set; } = 2.27f;
+    public float P2000 { get; set; } = 2.2f;
+    public float USPS { get; set; } = 2.2f;
+    public float DualBerettas { get; set; } = 3.78f;
+    public float P250 { get; set; } = 2.2f;
+    public float FiveSeven { get; set; } = 2.2f;
+    public float Tec9 { get; set; } = 2.5f;
+    public float CZ75Auto { get; set; } = 2.73f;
+    public float DesertEagle { get; set; } = 2.2f;
+    public float Revolver { get; set; } = 2.3f;
 }
