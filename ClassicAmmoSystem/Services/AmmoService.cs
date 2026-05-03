@@ -4,7 +4,6 @@ using Microsoft.Extensions.Options;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.SchemaDefinitions;
-using System.Diagnostics.CodeAnalysis;
 
 namespace ClassicAmmoSystem.Services
 {
@@ -231,11 +230,11 @@ namespace ClassicAmmoSystem.Services
             });
         }
 
+        public bool IsWeaponBaseValid(CCSWeaponBase? weaponBase) =>
+            weaponBase is not null && weaponBase.IsValidEntity && weaponBase.IsValid;
+
         private float GetReloadTime(string weaponEntityName) =>
             _weaponReloadTime.TryGetValue(weaponEntityName, out var reloadTime) ? reloadTime : 2f;
-
-        private bool IsWeaponBaseValid([NotNullWhen(true)] CCSWeaponBase weaponBase) =>
-            weaponBase is not null && weaponBase.IsValidEntity && weaponBase.IsValid;
 
         private bool IsShotgunWithoutMagzine(string weaponEntityName)
         {

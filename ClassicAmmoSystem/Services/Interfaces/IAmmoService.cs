@@ -1,5 +1,6 @@
 ﻿using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.SchemaDefinitions;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ClassicAmmoSystem.Services.Interfaces
 {
@@ -59,5 +60,12 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// <param name="player">The player for whom the weapon is being reloaded. If null or invalid, the reload will not complete.</param>
         /// <exception cref="InvalidOperationException">Thrown if the specified weapon base is invalid.</exception>
         public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player);
+
+        /// <summary>
+        /// Determines whether the specified weapon base instance is valid for use.
+        /// </summary>
+        /// <param name="weaponBase">The weapon base instance to validate. Can be null.</param>
+        /// <returns>true if the weapon base is not null and both its entity and weapon state are valid; otherwise, false.</returns>
+        bool IsWeaponBaseValid([NotNullWhen(true)] CCSWeaponBase? weaponBase);
     }
 }

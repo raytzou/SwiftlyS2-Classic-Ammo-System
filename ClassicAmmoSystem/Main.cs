@@ -2,6 +2,7 @@
 using ClassicAmmoSystem.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Events;
 using SwiftlyS2.Shared.GameEventDefinitions;
@@ -57,21 +58,39 @@ namespace ClassicAmmoSystem
                 var player = @event.UserIdPlayer;
 
                 if (player is null || !player.IsValid)
-                    throw new InvalidOperationException("Player is null or invalid after reloading weapon");
+                {
+                    Core.Logger.LogWarning("Reload validation failed: player is null or invalid.");
+                    return HookResult.Continue;
+                }
 
                 if (player.PlayerPawn is null || !player.PlayerPawn.IsValid)
-                    throw new InvalidOperationException("PlayerPawn is null or invalid after reloading weapon");
+                {
+                    Core.Logger.LogWarning("Reload validation failed: player pawn is null or invalid.");
+                    return HookResult.Continue;
+                }
 
                 if (player.PlayerPawn.WeaponServices is null || !player.PlayerPawn.WeaponServices.IsValid)
-                    throw new InvalidOperationException("WeaponServices is null or invalid after reloading weapon");
+                {
+                    Core.Logger.LogWarning("Reload validation failed: weapon services are null or invalid.");
+                    return HookResult.Continue;
+                }
 
                 var activeWeapon = player.PlayerPawn.WeaponServices.ActiveWeapon.Value;
 
                 if (activeWeapon is null || !activeWeapon.IsValid)
-                    throw new InvalidOperationException("ActiveWeapon is null or invalid after reloading weapon");
+                {
+                    Core.Logger.LogWarning("Reload validation failed: active weapon is null or invalid.");
+                    return HookResult.Continue;
+                }
 
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
                 var weaponBase = activeWeapon.As<CCSWeaponBase>();
+
+                if (!ammoService.IsWeaponBaseValid(weaponBase))
+                {
+                    Core.Logger.LogWarning("Reload validation failed: active weapon could not be resolved as a valid CCSWeaponBase.");
+                    return HookResult.Continue;
+                }
 
                 ammoService.ReloadWeapon(weaponBase, player);
 
