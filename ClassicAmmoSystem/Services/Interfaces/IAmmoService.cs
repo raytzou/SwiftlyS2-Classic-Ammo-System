@@ -9,56 +9,63 @@ namespace ClassicAmmoSystem.Services.Interfaces
         public void Initialize();
 
         /// <summary>
-        /// Sets the current ammunition amount for the specified weapon.
+        /// Sets the current and maximum ammunition amount for the specified weapon.
         /// </summary>
-        /// <param name="weaponBase">The weapon instance for which to set the ammunition amount. Cannot be null.</param>
-        /// <param name="amount">The new ammunition amount to assign to the weapon. Must be zero or greater.</param>
+        /// <remarks>This method updates both the current clip and the maximum clip size for the weapon.
+        /// Use this method to synchronize ammunition counts after events such as reloading or picking up
+        /// ammo.</remarks>
+        /// <param name="weaponBase">The weapon instance whose ammunition amount will be updated. Must be a valid weapon base.</param>
+        /// <param name="amount">The new ammunition amount to assign. This value is set as both the current and maximum clip size.</param>
+        /// <exception cref="InvalidOperationException">Thrown if weaponBase is not valid.</exception>
         public void SetAmmoAmount(CCSWeaponBase weaponBase, int amount);
 
         /// <summary>
-        /// Sets the reserved ammunition amount for the specified weapon.
+        /// Sets the reserve ammunition amount for the specified weapon.
         /// </summary>
-        /// <param name="weaponBase">The weapon for which to set the reserved ammunition amount. Cannot be null.</param>
-        /// <param name="amount">The number of reserved ammunition units to assign. Must be zero or greater.</param>
+        /// <remarks>This method updates both the current and maximum reserve ammunition for the weapon.
+        /// Callers should ensure that the amount provided is appropriate for the weapon's intended use.</remarks>
+        /// <param name="weaponBase">The weapon for which to set the reserve ammunition amount. Must be a valid instance.</param>
+        /// <param name="amount">The new reserve ammunition amount to assign. This value determines both the current and maximum reserve ammo
+        /// for the weapon.</param>
+        /// <exception cref="InvalidOperationException">Thrown if weaponBase is not a valid weapon instance.</exception>
         public void SetReserveAmmoAmount(CCSWeaponBase weaponBase, int amount);
 
         /// <summary>
         /// Gets the current amount of ammunition available for the specified weapon entity.
         /// </summary>
-        /// <param name="weaponEntityName">The name of the weapon entity for which to retrieve the ammunition amount. Cannot be null or empty.</param>
-        /// <returns>The number of ammunition units available for the specified weapon entity. Returns 0 if the weapon entity is
-        /// not found or has no ammunition.</returns>
+        /// <param name="weaponEntityName">The name of the weapon entity for which to retrieve the ammunition amount. Cannot be null.</param>
+        /// <returns>The number of available ammunition units for the specified weapon entity, or null if the weapon entity is
+        /// not found.</returns>
         public int? GetAmmoAmount(string weaponEntityName);
 
         /// <summary>
-        /// Gets the current amount of reserve ammunition available for the specified weapon.
+        /// Gets the current reserve ammunition amount for the specified weapon entity, if available.
         /// </summary>
-        /// <param name="weaponEntityName">The name of the weapon entity for which to retrieve the reserve ammunition amount. Cannot be null or empty.</param>
-        /// <returns>The number of reserve ammunition units available for the specified weapon. Returns 0 if the weapon has no
-        /// reserve ammunition or is not found.</returns>
+        /// <param name="weaponEntityName">The name of the weapon entity for which to retrieve the reserve ammunition amount. Cannot be null.</param>
+        /// <returns>The reserve ammunition amount for the specified weapon entity, or null if the weapon entity is not found.</returns>
         public int? GetReserveAmmoAmount(string weaponEntityName);
 
         /// <summary>
-        /// Gets the entity name for the specified weapon, mapping certain weapon and item index combinations to their
-        /// alternate entity names.
+        /// Gets the entity name for the specified weapon, applying special mappings for certain weapon types.
         /// </summary>
-        /// <remarks>This method maps certain weapons to alternate entity names based on their designer
-        /// name and item definition index. For all other weapons, the original designer name is returned.</remarks>
-        /// <param name="weaponBase">The weapon instance for which to retrieve the entity name. Must not be null.</param>
-        /// <returns>The entity name corresponding to the weapon. For specific weapon and item index combinations, returns an
-        /// alternate entity name; otherwise, returns the weapon's designer name.</returns>
+        /// <remarks>This method maps specific weapon and item index combinations to alternate entity
+        /// names, reflecting special cases in weapon identification.</remarks>
+        /// <param name="weaponBase">The weapon instance for which to retrieve the entity name. Cannot be null.</param>
+        /// <returns>The entity name string corresponding to the weapon. For certain weapon types, returns a mapped entity name;
+        /// otherwise, returns the designer name.</returns>
         public string GetWeaponEntityName(CCSWeaponBase weaponBase);
 
         /// <summary>
         /// Reloads the specified weapon for the given player, updating the weapon's clip and reserve ammunition after
-        /// the appropriate reload time.
+        /// the reload delay.
         /// </summary>
-        /// <remarks>If the weapon is a shotgun without a magazine or the maximum clip amount cannot be
-        /// determined, the reload operation is skipped. The reload is performed asynchronously after the weapon's
-        /// reload time has elapsed.</remarks>
-        /// <param name="weaponBase">The weapon instance to reload. Must represent a valid weapon base.</param>
-        /// <param name="player">The player for whom the weapon is being reloaded. If null or invalid, the reload will not complete.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the specified weapon base is invalid.</exception>
+        /// <remarks>The reload operation is delayed according to the weapon's reload time. If the weapon
+        /// is a shotgun without a magazine or the weapon handle is invalid, the method returns without performing a
+        /// reload. The method ensures that the correct weapon and player state are maintained before updating
+        /// ammunition counts.</remarks>
+        /// <param name="weaponBase">The weapon to reload. Must be a valid weapon instance.</param>
+        /// <param name="player">The player who owns the weapon. If null or invalid, the reload will not complete.</param>
+        /// <exception cref="InvalidOperationException">Thrown if weaponBase is not a valid weapon instance.</exception>
         public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player);
 
         /// <summary>
