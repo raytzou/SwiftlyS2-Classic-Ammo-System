@@ -104,8 +104,12 @@ namespace ClassicAmmoSystem
                 throw new InvalidOperationException("Service Provider is null.");
 
             var instance = @event.Entity;
+            if (instance is null || !instance.IsValidEntity)
+                return;
+
             var designName = instance.DesignerName;
-            if (instance is null || !instance.IsValidEntity || !designName.StartsWith("weapon_")) return;
+            if (!designName.StartsWith("weapon_"))
+                return;
 
             Core.Scheduler.NextWorldUpdate(() =>
             {
