@@ -195,8 +195,12 @@ namespace ClassicAmmoSystem.Services
                 throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
 
             var weaponEntityName = GetWeaponEntityName(weaponBase);
+            var reloadingWeaponHandle = _core.EntitySystem.GetRefEHandle(weaponBase);
 
             if (IsShotgunWithoutMagzine(weaponEntityName))
+                return;
+
+            if (!reloadingWeaponHandle.IsValid)
                 return;
 
             var currentAmmoAmount = weaponBase.Clip1;
@@ -214,6 +218,9 @@ namespace ClassicAmmoSystem.Services
             _core.Scheduler.DelayBySeconds(reloadTime, () =>
             {
                 if (player is null || !player.IsValid || !player.IsAlive)
+                    return;
+
+                if (!IsWeaponTheSame(reloadingWeaponHandle.Raw, player))
                     return;
 
                 _core.Scheduler.NextWorldUpdate(() =>
@@ -235,6 +242,40 @@ namespace ClassicAmmoSystem.Services
             var shotguns = new HashSet<string> { "weapon_nova", "weapon_xm1014", "weapon_sawedoff" };
 
             return shotguns.Contains(weaponEntityName);
+        }
+
+        private bool IsWeaponTheSame(uint reloadingWeaponHandleRaw, IPlayer player)
+        {
+            var playerPawn = player.PlayerPawn;
+            if (playerPawn is null || !playerPawn.IsValid)
+            {
+                _logger.LogWarning("Reload check aborted: player pawn is null or invalid while checking weapon handle {WeaponHandleRaw}.", reloadingWeaponHandleRaw);
+                return false;
+            }
+
+            var weaponServices = playerPawn.WeaponServices;
+            if (weaponServices is null || !weaponServices.IsValid)
+            {
+                _logger.LogWarning("Reload check aborted: weapon services are null or invalid while checking weapon handle {WeaponHandleRaw}.", reloadingWeaponHandleRaw);
+                return false;
+            }
+
+            var activeWeapon = weaponServices.ActiveWeapon.Value;
+            if (activeWeapon is null || !activeWeapon.IsValid)
+            {
+                _logger.LogWarning("Reload check aborted: active weapon is null or invalid while checking weapon handle {WeaponHandleRaw}.", reloadingWeaponHandleRaw);
+                return false;
+            }
+
+            var weaponBase = activeWeapon.As<CCSWeaponBase>();
+            if (!IsWeaponBaseValid(weaponBase))
+            {
+                _logger.LogWarning("Reload check aborted: active weapon could not be cast to a valid CCSWeaponBase while checking weapon handle {WeaponHandleRaw}.", reloadingWeaponHandleRaw);
+                return false;
+            }
+
+            var currentWeaponHandle = _core.EntitySystem.GetRefEHandle(weaponBase);
+            return currentWeaponHandle.IsValid && currentWeaponHandle.Raw == reloadingWeaponHandleRaw;
         }
     }
 }
