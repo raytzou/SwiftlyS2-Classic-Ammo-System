@@ -73,7 +73,7 @@ namespace ClassicAmmoSystem
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
                 var weaponBase = activeWeapon.As<CCSWeaponBase>();
 
-                ammoService.ReloadWeapon(weaponBase);
+                ammoService.ReloadWeapon(weaponBase, player);
 
                 return HookResult.Continue;
             });

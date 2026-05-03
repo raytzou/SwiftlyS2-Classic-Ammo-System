@@ -1,4 +1,5 @@
-﻿using SwiftlyS2.Shared.SchemaDefinitions;
+﻿using SwiftlyS2.Shared.Players;
+using SwiftlyS2.Shared.SchemaDefinitions;
 
 namespace ClassicAmmoSystem.Services.Interfaces
 {
@@ -48,15 +49,15 @@ namespace ClassicAmmoSystem.Services.Interfaces
         public string GetWeaponEntityName(CCSWeaponBase weaponBase);
 
         /// <summary>
-        /// Reloads the specified weapon by transferring available reserve ammunition to the weapon's clip, up to the
-        /// clip's maximum capacity.
+        /// Reloads the specified weapon for the given player, updating the weapon's clip and reserve ammunition after
+        /// the appropriate reload time.
         /// </summary>
-        /// <remarks>If the total available ammunition is less than the clip's maximum capacity, all
-        /// remaining ammunition is loaded into the clip and the reserve is set to zero. Otherwise, the clip is filled
-        /// to its maximum and the remaining ammunition stays in reserve.</remarks>
-        /// <param name="weaponBase">The weapon instance to reload. Must represent a valid weapon and contain information about current and
-        /// reserve ammunition.</param>
-        /// <exception cref="InvalidOperationException">Thrown if the specified weapon is not valid.</exception>
-        public void ReloadWeapon(CCSWeaponBase weaponBase);
+        /// <remarks>If the weapon is a shotgun without a magazine or the maximum clip amount cannot be
+        /// determined, the reload operation is skipped. The reload is performed asynchronously after the weapon's
+        /// reload time has elapsed.</remarks>
+        /// <param name="weaponBase">The weapon instance to reload. Must represent a valid weapon base.</param>
+        /// <param name="player">The player for whom the weapon is being reloaded. If null or invalid, the reload will not complete.</param>
+        /// <exception cref="InvalidOperationException">Thrown if the specified weapon base is invalid.</exception>
+        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player);
     }
 }

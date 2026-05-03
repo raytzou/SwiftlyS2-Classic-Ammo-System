@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using SwiftlyS2.Shared;
+using SwiftlyS2.Shared.Players;
 using SwiftlyS2.Shared.SchemaDefinitions;
 using System.Diagnostics.CodeAnalysis;
 
@@ -188,8 +189,7 @@ namespace ClassicAmmoSystem.Services
             };
         }
 
-
-        public void ReloadWeapon(CCSWeaponBase weaponBase)
+        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer? player)
         {
             if (!IsWeaponBaseValid(weaponBase))
                 throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
@@ -213,6 +213,9 @@ namespace ClassicAmmoSystem.Services
 
             _core.Scheduler.DelayBySeconds(reloadTime, () =>
             {
+                if (player is null || !player.IsValid || !player.IsAlive)
+                    return;
+
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
                     SetAmmoAmount(weaponBase, finalClipAmount);
