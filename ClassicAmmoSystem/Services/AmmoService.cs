@@ -222,6 +222,12 @@ namespace ClassicAmmoSystem.Services
                 if (!IsWeaponTheSame(reloadingWeaponHandle.Raw, player))
                     return;
 
+                // it's a little bit tricky here, due to reloadTime is later than Engine updating
+                // if ReserveAmmo[0] - 1 => reload finished
+                // otherwise reloading has not finished yet
+                if(weaponBase.ReserveAmmo[0] != (currentReserveAmmoAmount - 1))
+                    return;
+
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
                     SetAmmoAmount(weaponBase, finalClipAmount);
