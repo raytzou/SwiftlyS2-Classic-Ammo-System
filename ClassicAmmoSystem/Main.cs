@@ -117,7 +117,7 @@ namespace ClassicAmmoSystem
 
                 return HookResult.Continue;
             });
-            Core.GameEvent.HookPost<EventRoundStartPostNav>((@event) =>
+            Core.GameEvent.HookPost<EventRoundStart>((@event) =>
             {
                 if (_serviceProvider is null)
                     throw new InvalidOperationException("Service Provider is null.");
