@@ -33,6 +33,15 @@ namespace ClassicAmmoSystem
 
         public override void Unload()
         {
+            if (_serviceProvider is null)
+            {
+                Core.Logger.LogWarning("Service Provider is null while unloading plugin.");
+                return;
+            }
+
+            var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+
+            ammoService.ClearReloadSession();
             _serviceProvider?.Dispose();
         }
 
@@ -48,6 +57,7 @@ namespace ClassicAmmoSystem
         private void RegisterEvents()
         {
             Core.Event.OnEntityCreated += OnEntityCreated;
+            Core.Event.OnMapUnload += OnMapUnload;
             Core.GameEvent.HookPost<EventWeaponReload>((@event) =>
             {
                 if (_serviceProvider is null)
@@ -96,6 +106,27 @@ namespace ClassicAmmoSystem
 
                 return HookResult.Continue;
             });
+            Core.GameEvent.HookPost<EventRoundEnd>((@event) =>
+            {
+                if (_serviceProvider is null)
+                    throw new InvalidOperationException("Service Provider is null.");
+
+                var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+
+                ammoService.ClearReloadSession();
+
+                return HookResult.Continue;
+            });
+        }
+
+        private void OnMapUnload(IOnMapUnloadEvent @event)
+        {
+            if (_serviceProvider is null)
+                throw new InvalidOperationException("Service Provider is null.");
+
+            var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+
+            ammoService.ClearReloadSession();
         }
 
         private void OnEntityCreated(IOnEntityCreatedEvent @event)

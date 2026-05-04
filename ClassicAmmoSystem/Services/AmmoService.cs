@@ -16,6 +16,7 @@ namespace ClassicAmmoSystem.Services
         private Dictionary<string, int> _weaponReserveAmmo = [];
         private Dictionary<string, int> _weaponAmmo = [];
         private Dictionary<string, float> _weaponReloadTime = [];
+        private Dictionary<uint, uint> _weaponReloadSessions = [];
 
         public AmmoService(ISwiftlyCore core, IOptionsMonitor<Config> config, ILogger<AmmoService> logger)
         {
@@ -210,6 +211,8 @@ namespace ClassicAmmoSystem.Services
             if (clipMaxAmount is null)
                 return;
 
+            var reloadSession = BeginReloadSession(reloadingWeaponHandle.Raw);
+
             var totalAmmo = currentAmmoAmount + currentReserveAmmoAmount;
             var finalClipAmount = Math.Min(totalAmmo, clipMaxAmount.Value);
             var finalReserveAmount = Math.Max(0, totalAmmo - clipMaxAmount.Value);
@@ -217,6 +220,9 @@ namespace ClassicAmmoSystem.Services
             _core.Scheduler.DelayBySeconds(reloadTime, () =>
             {
                 if (player is null || !player.IsValid || !player.IsAlive)
+                    return;
+
+                if (!IsReloadSessionCurrent(reloadingWeaponHandle.Raw, reloadSession))
                     return;
 
                 if (!IsWeaponBaseValid(weaponBase))
@@ -233,11 +239,19 @@ namespace ClassicAmmoSystem.Services
 
                 _core.Scheduler.NextWorldUpdate(() =>
                 {
+                    if (!IsReloadSessionCurrent(reloadingWeaponHandle.Raw, reloadSession))
+                        return;
+
+                    if (!IsWeaponBaseValid(weaponBase))
+                        return;
+
                     SetAmmoAmount(weaponBase, finalClipAmount);
                     SetReserveAmmoAmount(weaponBase, finalReserveAmount);
                 });
             });
         }
+
+        public void ClearReloadSession() => _weaponReloadSessions.Clear();
 
         public bool IsWeaponBaseValid(CCSWeaponBase? weaponBase) =>
             weaponBase is not null && weaponBase.IsValidEntity && weaponBase.IsValid;
@@ -251,6 +265,23 @@ namespace ClassicAmmoSystem.Services
 
             return shotguns.Contains(weaponEntityName);
         }
+
+        private uint BeginReloadSession(uint weaponHandleRaw)
+        {
+            if (_weaponReloadSessions.TryGetValue(weaponHandleRaw, out var currentSession))
+            {
+                var nextSession = currentSession + 1;
+                _weaponReloadSessions[weaponHandleRaw] = nextSession;
+
+                return nextSession;
+            }
+
+            _weaponReloadSessions[weaponHandleRaw] = 1;
+            return 1;
+        }
+
+        private bool IsReloadSessionCurrent(uint weaponHandleRaw, uint reloadSession) =>
+            _weaponReloadSessions.TryGetValue(weaponHandleRaw, out var currentSession) && currentSession == reloadSession;
 
         private bool IsWeaponTheSame(uint reloadingWeaponHandleRaw, IPlayer player)
         {

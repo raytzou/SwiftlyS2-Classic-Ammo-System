@@ -74,5 +74,13 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// <param name="weaponBase">The weapon base instance to validate. Can be null.</param>
         /// <returns>true if the weapon base is not null and both its entity and weapon state are valid; otherwise, false.</returns>
         bool IsWeaponBaseValid([NotNullWhen(true)] CCSWeaponBase? weaponBase);
+
+        /// <summary>
+        /// Clears all active weapon reload sessions.
+        /// </summary>
+        /// <remarks>Call this method to reset the reload state for all weapons, typically when
+        /// reinitializing or resetting the system. After calling this method, any ongoing reload operations will be
+        /// discarded.</remarks>
+        void ClearReloadSession();
     }
 }
