@@ -117,6 +117,20 @@ namespace ClassicAmmoSystem
 
                 return HookResult.Continue;
             });
+            Core.GameEvent.HookPost<EventRoundStartPostNav>((@event) =>
+            {
+                if (_serviceProvider is null)
+                    throw new InvalidOperationException("Service Provider is null.");
+
+                var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+
+                Core.Scheduler.NextWorldUpdate(() =>
+                {
+                    ammoService.ResetAllWeaponAmmo();
+                });
+
+                return HookResult.Continue;
+            });
         }
 
         private void OnMapUnload(IOnMapUnloadEvent @event)

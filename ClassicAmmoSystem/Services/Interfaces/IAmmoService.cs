@@ -82,5 +82,13 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// reinitializing or resetting the system. After calling this method, any ongoing reload operations will be
         /// discarded.</remarks>
         void ClearReloadSession();
+
+        /// <summary>
+        /// Resets the ammunition and reserve ammunition for all valid weapon entities to their default values.
+        /// </summary>
+        /// <remarks>This method iterates through all entities recognized as weapons and restores their
+        /// ammo counts based on predefined defaults. Only valid weapon entities are affected. Use this method to ensure
+        /// all weapons are reset to a consistent state, such as at the start of a new round or scenario.</remarks>
+        void ResetAllWeaponAmmo();
     }
 }

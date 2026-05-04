@@ -251,6 +251,32 @@ namespace ClassicAmmoSystem.Services
             });
         }
 
+        public void ResetAllWeaponAmmo()
+        {
+            var entities = _core.EntitySystem.GetAllEntities()
+                .Where(w => w.Entity is not null && w.Entity.IsValid && w.IsValidEntity && w.Entity.DesignerName.StartsWith("weapon_"))
+                .ToList();
+
+            foreach (var entity in entities)
+            {
+                var weaponBase = entity.As<CCSWeaponBase>();
+
+                if (!IsWeaponBaseValid(weaponBase))
+                    continue;
+
+                var weaponEntityName = GetWeaponEntityName(weaponBase);
+                var ammoAmount = GetAmmoAmount(weaponEntityName);
+
+                if (ammoAmount is not null)
+                    SetAmmoAmount(weaponBase, ammoAmount.Value);
+
+                var reserveAmmoAmount = GetReserveAmmoAmount(weaponEntityName);
+
+                if (reserveAmmoAmount is not null)
+                    SetReserveAmmoAmount(weaponBase, reserveAmmoAmount.Value);
+            }
+        }
+
         public void ClearReloadSession() => _weaponReloadSessions.Clear();
 
         public bool IsWeaponBaseValid(CCSWeaponBase? weaponBase) =>
