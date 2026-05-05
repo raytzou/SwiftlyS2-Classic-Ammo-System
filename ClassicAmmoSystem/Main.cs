@@ -260,10 +260,15 @@ namespace ClassicAmmoSystem
             if (!designName.StartsWith("weapon_"))
                 return;
 
+            var weaponBase = instance.As<CCSWeaponBase>();
+
             Core.Scheduler.NextWorldUpdate(() =>
             {
-                var weaponBase = instance.As<CCSWeaponBase>();
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+
+                if (!ammoService.IsWeaponBaseValid(weaponBase))
+                    return;
+
                 var weaponEntityName = ammoService.GetWeaponEntityName(weaponBase);
                 var ammoAmount = ammoService.GetAmmoAmount(weaponEntityName);
                 var reserveAmmoAmount = ammoService.GetReserveAmmoAmount(weaponEntityName);
