@@ -131,6 +131,58 @@ namespace ClassicAmmoSystem
 
                 return HookResult.Continue;
             });
+            Core.GameEvent.HookPost<EventWeaponFire>((@event) =>
+            {
+                if (_serviceProvider is null)
+                    throw new InvalidOperationException("Service Provider is null.");
+
+                var playerPawn = @event.UserIdPawn;
+
+                if (playerPawn is null || !playerPawn.IsValid)
+                {
+                    Core.Logger.LogWarning("EventWeaponFire: player pawn is null or invalid.");
+                    return HookResult.Continue;
+                }
+
+                var weaponService = playerPawn.WeaponServices;
+
+                if (weaponService is null || !weaponService.IsValid)
+                {
+                    Core.Logger.LogWarning("EventWeaponFire: weapon service is null or invalid.");
+                    return HookResult.Continue;
+                }
+
+                var activeWeapon = weaponService.ActiveWeapon.Value;
+
+                if (activeWeapon is null || !activeWeapon.IsValid)
+                {
+                    Core.Logger.LogWarning("EventWeaponFire: active weapon is null or invalid");
+                    return HookResult.Continue;
+                }
+
+                var ammoAmount = activeWeapon.Clip1;
+
+                if (ammoAmount - 1 != 0)
+                    return HookResult.Continue;
+
+                var player = @event.UserIdPlayer;
+
+                Core.Scheduler.NextWorldUpdate(() =>
+                {
+                    if (player is null || !player.IsValid)
+                    {
+                        Core.Logger.LogWarning("EventWeaponFire: player is null or invalid");
+                        return;
+                    }
+
+                    var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
+                    var weaponBase = activeWeapon.As<CCSWeaponBase>();
+
+                    ammoService.ReloadWeapon(weaponBase, player);
+                });
+
+                return HookResult.Continue;
+            });
         }
 
         private void OnMapUnload(IOnMapUnloadEvent @event)
