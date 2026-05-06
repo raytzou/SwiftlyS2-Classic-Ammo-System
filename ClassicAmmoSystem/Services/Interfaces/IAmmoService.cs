@@ -66,7 +66,7 @@ namespace ClassicAmmoSystem.Services.Interfaces
         /// <param name="weaponBase">The weapon to reload. Must be a valid weapon instance.</param>
         /// <param name="player">The player who owns the weapon. If null or invalid, the reload will not complete.</param>
         /// <exception cref="InvalidOperationException">Thrown if weaponBase is not a valid weapon instance.</exception>
-        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player);
+        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player, float emptyReloadExtraDelay = 0f);
 
         /// <summary>
         /// Determines whether the specified weapon base instance is valid for use.

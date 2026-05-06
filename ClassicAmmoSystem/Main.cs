@@ -177,8 +177,12 @@ namespace ClassicAmmoSystem
 
                     var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
                     var weaponBase = activeWeapon.As<CCSWeaponBase>();
+                    var extraDelay = 0f;
 
-                    ammoService.ReloadWeapon(weaponBase, player);
+                    if (weaponBase.DesignerName == "weapon_deagle" && weaponBase.AttributeManager.Item.ItemDefinitionIndex == 64)
+                        extraDelay = 0.5f;
+
+                    ammoService.ReloadWeapon(weaponBase, player, extraDelay);
                 });
 
                 return HookResult.Continue;
@@ -229,8 +233,15 @@ namespace ClassicAmmoSystem
 
                     var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
                     var weaponBase = activeWeapon.As<CCSWeaponBase>();
+                    var extraDelay = 0f;
 
-                    ammoService.ReloadWeapon(weaponBase, player);
+                    if (weaponBase.DesignerName == "weapon_elite")
+                        extraDelay = 0.5f;
+
+                    if (weaponBase.DesignerName == "weapon_deagle" && weaponBase.AttributeManager.Item.ItemDefinitionIndex == 64)
+                        extraDelay = 1f;
+
+                    ammoService.ReloadWeapon(weaponBase, player, extraDelay);
                 });
 
                 return HookResult.Continue;

@@ -189,7 +189,7 @@ namespace ClassicAmmoSystem.Services
             };
         }
 
-        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer? player)
+        public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer? player, float emptyReloadExtraDelay = 0f)
         {
             if (!IsWeaponBaseValid(weaponBase))
                 throw new InvalidOperationException($"Weapon Base is invalid, {weaponBase.DesignerName}");
@@ -206,7 +206,7 @@ namespace ClassicAmmoSystem.Services
             var currentAmmoAmount = weaponBase.Clip1;
             var currentReserveAmmoAmount = weaponBase.ReserveAmmo[0];
             var clipMaxAmount = GetAmmoAmount(weaponEntityName);
-            var reloadTime = GetReloadTime(weaponEntityName);
+            var reloadTime = GetReloadTime(weaponEntityName) + emptyReloadExtraDelay;
 
             if (clipMaxAmount is null)
                 return;
