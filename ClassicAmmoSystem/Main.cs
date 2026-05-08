@@ -30,6 +30,8 @@ namespace ClassicAmmoSystem
 
         public override void Unload()
         {
+            Core.Event.OnEntityCreated -= OnEntityCreated;
+            Core.Event.OnMapUnload -= OnMapUnload;
             Core.GameEvent.UnhookPost<EventWeaponReload>();
             Core.GameEvent.UnhookPost<EventRoundEnd>();
             Core.GameEvent.UnhookPost<EventRoundStart>();
