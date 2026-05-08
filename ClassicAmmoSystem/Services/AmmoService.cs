@@ -9,6 +9,9 @@ namespace ClassicAmmoSystem.Services
 {
     public class AmmoService : IAmmoService
     {
+        private const float ReloadCompletionRetryIntervalSeconds = 0.1f;
+        private const float ReloadCompletionRetryWindowSeconds = 15f;
+
         private readonly ISwiftlyCore _core;
         private readonly IOptionsMonitor<Config> _config;
         private readonly ILogger<AmmoService> _logger;
@@ -219,35 +222,15 @@ namespace ClassicAmmoSystem.Services
 
             _core.Scheduler.DelayBySeconds(reloadTime, () =>
             {
-                if (player is null || !player.IsValid || !player.IsAlive)
-                    return;
-
-                if (!IsReloadSessionCurrent(reloadingWeaponHandle.Raw, reloadSession))
-                    return;
-
-                if (!IsWeaponBaseValid(weaponBase))
-                    return;
-
-                // it's a little bit tricky here, due to reloadTime is later than Engine updating
-                // if ReserveAmmo[0] - 1 => reload finished
-                // otherwise reloading has not finished yet
-                if (weaponBase.ReserveAmmo[0] != (currentReserveAmmoAmount - 1))
-                    return;
-
-                _core.Scheduler.NextWorldUpdate(() =>
-                {
-                    if (player is null || !player.IsValid || !player.IsAlive)
-                        return;
-
-                    if (!IsReloadSessionCurrent(reloadingWeaponHandle.Raw, reloadSession))
-                        return;
-
-                    if (!IsWeaponBaseValid(weaponBase))
-                        return;
-
-                    SetAmmoAmount(weaponBase, finalClipAmount);
-                    SetReserveAmmoAmount(weaponBase, finalReserveAmount);
-                });
+                WaitForReloadCompletion(
+                    weaponBase,
+                    player,
+                    reloadingWeaponHandle.Raw,
+                    reloadSession,
+                    currentReserveAmmoAmount,
+                    finalClipAmount,
+                    finalReserveAmount,
+                    ReloadCompletionRetryWindowSeconds);
             });
         }
 
@@ -284,6 +267,64 @@ namespace ClassicAmmoSystem.Services
 
         private float GetReloadTime(string weaponEntityName) =>
             _weaponReloadTime.TryGetValue(weaponEntityName, out var reloadTime) ? reloadTime : 2f;
+
+        private void WaitForReloadCompletion(
+            CCSWeaponBase weaponBase,
+            IPlayer? player,
+            uint weaponHandleRaw,
+            uint reloadSession,
+            int currentReserveAmmoAmount,
+            int finalClipAmount,
+            int finalReserveAmount,
+            float remainingRetryWindowSeconds)
+        {
+            if (player is null || !player.IsValid || !player.IsAlive)
+                return;
+
+            if (!IsReloadSessionCurrent(weaponHandleRaw, reloadSession))
+                return;
+
+            if (!IsWeaponBaseValid(weaponBase))
+                return;
+
+            // The engine can delay the actual reload start after we detect an empty-mag path,
+            // so keep watching for the reserve-ammo decrement instead of checking only once.
+            if (weaponBase.ReserveAmmo[0] == (currentReserveAmmoAmount - 1))
+            {
+                _core.Scheduler.NextWorldUpdate(() =>
+                {
+                    if (player is null || !player.IsValid || !player.IsAlive)
+                        return;
+
+                    if (!IsReloadSessionCurrent(weaponHandleRaw, reloadSession))
+                        return;
+
+                    if (!IsWeaponBaseValid(weaponBase))
+                        return;
+
+                    SetAmmoAmount(weaponBase, finalClipAmount);
+                    SetReserveAmmoAmount(weaponBase, finalReserveAmount);
+                });
+
+                return;
+            }
+
+            if (remainingRetryWindowSeconds <= 0f)
+                return;
+
+            _core.Scheduler.DelayBySeconds(ReloadCompletionRetryIntervalSeconds, () =>
+            {
+                WaitForReloadCompletion(
+                    weaponBase,
+                    player,
+                    weaponHandleRaw,
+                    reloadSession,
+                    currentReserveAmmoAmount,
+                    finalClipAmount,
+                    finalReserveAmount,
+                    remainingRetryWindowSeconds - ReloadCompletionRetryIntervalSeconds);
+            });
+        }
 
         private bool IsShotgunWithoutMagzine(string weaponEntityName)
         {

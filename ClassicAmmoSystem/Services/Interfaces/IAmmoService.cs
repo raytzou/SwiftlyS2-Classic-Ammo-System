@@ -56,16 +56,16 @@ namespace ClassicAmmoSystem.Services.Interfaces
         public string GetWeaponEntityName(CCSWeaponBase weaponBase);
 
         /// <summary>
-        /// Reloads the specified weapon for the given player, updating the weapon's clip and reserve ammunition after
-        /// the reload delay.
+        /// Initiates the reload process for the specified weapon, updating its ammunition based on the current clip and
+        /// reserve ammo counts.
         /// </summary>
-        /// <remarks>The reload operation is delayed according to the weapon's reload time. If the weapon
-        /// is a shotgun without a magazine or the weapon handle is invalid, the method returns without performing a
-        /// reload. The method ensures that the correct weapon and player state are maintained before updating
-        /// ammunition counts.</remarks>
-        /// <param name="weaponBase">The weapon to reload. Must be a valid weapon instance.</param>
-        /// <param name="player">The player who owns the weapon. If null or invalid, the reload will not complete.</param>
-        /// <exception cref="InvalidOperationException">Thrown if weaponBase is not a valid weapon instance.</exception>
+        /// <remarks>If the weapon does not support magazine-based reloading or the weapon handle is
+        /// invalid, the method returns without performing a reload. The reload is scheduled asynchronously and may be
+        /// delayed based on the provided extra delay.</remarks>
+        /// <param name="weaponBase">The weapon to reload. Must represent a valid weapon entity.</param>
+        /// <param name="player">The player performing the reload, or null if not applicable.</param>
+        /// <param name="emptyReloadExtraDelay">An additional delay, in seconds, to apply to the reload time if the weapon is empty. Defaults to 0.</param>
+        /// <exception cref="InvalidOperationException">Thrown if weaponBase is not a valid weapon entity.</exception>
         public void ReloadWeapon(CCSWeaponBase weaponBase, IPlayer player, float emptyReloadExtraDelay = 0f);
 
         /// <summary>
