@@ -56,13 +56,13 @@ namespace ClassicAmmoSystem
 
         private void RegisterEvents()
         {
+            if (_serviceProvider is null)
+                throw new InvalidOperationException("Service Provider is null.");
+
             Core.Event.OnEntityCreated += OnEntityCreated;
             Core.Event.OnMapUnload += OnMapUnload;
             Core.GameEvent.HookPost<EventWeaponReload>((@event) =>
             {
-                if (_serviceProvider is null)
-                    throw new InvalidOperationException("Service Provider is null.");
-
                 @event.DontBroadcast = true;
 
                 var player = @event.UserIdPlayer;
@@ -108,9 +108,6 @@ namespace ClassicAmmoSystem
             });
             Core.GameEvent.HookPost<EventRoundEnd>((@event) =>
             {
-                if (_serviceProvider is null)
-                    throw new InvalidOperationException("Service Provider is null.");
-
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
 
                 ammoService.ClearReloadSession();
@@ -119,9 +116,6 @@ namespace ClassicAmmoSystem
             });
             Core.GameEvent.HookPost<EventRoundStart>((@event) =>
             {
-                if (_serviceProvider is null)
-                    throw new InvalidOperationException("Service Provider is null.");
-
                 var ammoService = _serviceProvider.GetRequiredService<IAmmoService>();
 
                 Core.Scheduler.NextWorldUpdate(() =>
@@ -133,9 +127,6 @@ namespace ClassicAmmoSystem
             });
             Core.GameEvent.HookPost<EventWeaponFire>((@event) =>
             {
-                if (_serviceProvider is null)
-                    throw new InvalidOperationException("Service Provider is null.");
-
                 var playerPawn = @event.UserIdPawn;
 
                 if (playerPawn is null || !playerPawn.IsValid)
@@ -189,9 +180,6 @@ namespace ClassicAmmoSystem
             });
             Core.GameEvent.HookPost<EventItemEquip>((@event) =>
             {
-                if (_serviceProvider is null)
-                    throw new InvalidOperationException("Service Provider is null.");
-
                 var playerPawn = @event.UserIdPawn;
 
                 if (playerPawn is null || !playerPawn.IsValid)
