@@ -29,11 +29,11 @@ Example: a player is holding an AK-47 with `21/87` ammo.
 
 ## Usage
 
-0. Build the plugin or download the plugin from [release](https://github.com/raytzou/SwiftlyS2-Classic-Ammo-System/releases/tag/1.0.0).
-1. Install the plugin.
-2. Start the server at least once after the plugin is installed.
-3. After the first server run, the plugin generates `csgo/addons/swiftlys2/configs/plugins/cas/config.jsonc`.
-4. Edit `config.jsonc` to configure clip ammo, reserve ammo, and reload animation time.
+1. Build the plugin or download the plugin from [release](https://github.com/raytzou/SwiftlyS2-Classic-Ammo-System/releases/).
+2. Install the plugin.
+3. Start the server at least once after the plugin is installed.
+4. After the first server run, the plugin generates `csgo/addons/swiftlys2/configs/plugins/cas/config.jsonc`.
+5. Edit `config.jsonc` to configure clip ammo, reserve ammo, and reload animation time.
 
 ## Installation
 
