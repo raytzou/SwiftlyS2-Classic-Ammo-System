@@ -1,4 +1,4 @@
-# Classic Ammo System (WIP)
+# Classic Ammo System
 
 <a href="https://www.youtube.com/watch?v=p2h6ZizVcwk" target="_blank">
  <img src="http://img.youtube.com/vi/p2h6ZizVcwk/mqdefault.jpg" alt="Watch the video" width="560" height="315" border="10" />
@@ -29,7 +29,7 @@ Example: a player is holding an AK-47 with `21/87` ammo.
 
 ## Usage
 
-0. Build the plugin.
+0. Build the plugin or download the plugin from [release](https://github.com/raytzou/SwiftlyS2-Classic-Ammo-System/releases/tag/1.0.0).
 1. Install the plugin.
 2. Start the server at least once after the plugin is installed.
 3. After the first server run, the plugin generates `csgo/addons/swiftlys2/configs/plugins/cas/config.jsonc`.
@@ -71,6 +71,8 @@ The main project file is `ClassicAmmoSystem/ClassicAmmoSystem.csproj`.
 ## Technical Notes
 
 - The plugin hooks `weapon_reload` through SwiftlyS2 and uses a delayed rewrite after the configured reload animation time.
+- Because `weapon_outofammo` is not currently available as a reliable SwiftlyS2 hook, the plugin uses `EventWeaponFire` and `EventItemEquip` together as a practical empty-mag reload fallback path.
+- Reload completion is verified through `WaitForReloadCompletion(...)`, which uses a bounded retry window after the nominal reload time so the final ammo rewrite still happens if `+attack` delays the actual reload start.
 - The reload logic is configuration-driven and stores per-weapon values for clip size, reserve ammo, and reload time.
 - On weapon entity creation and on round start, the plugin reapplies configured ammo values to keep weapon state consistent.
 - Reload sessions are tracked so stale delayed callbacks do not overwrite newer weapon state.
@@ -78,12 +80,16 @@ The main project file is `ClassicAmmoSystem/ClassicAmmoSystem.csproj`.
 
 ## Known Issue
 
-Reloading after a weapon has completely run out of ammo does not use the same event path as `weapon_reload`.
+~~Reloading after a weapon has completely run out of ammo does not use the same event path as `weapon_reload`.~~
 
-At the moment, SwiftlyS2 does not provide a valid and usable abstraction for hooking `weapon_outofammo`, so the plugin cannot currently apply the correct classic ammo values for empty-mag reloads.
+~~At the moment, SwiftlyS2 does not provide a valid and usable abstraction for hooking `weapon_outofammo`, so the plugin cannot currently apply the correct classic ammo values for empty-mag reloads.~~
 
-In that case, the weapon still follows the newer reload rule and may end up with the `reserve ammo -1` behavior.
+~~In that case, the weapon still follows the newer reload rule and may end up with the `reserve ammo -1` behavior.~~
+
+The current implementation uses `EventWeaponFire` and `EventItemEquip` as the empty-mag workaround, and current testing shows that this path behaves correctly in practice.
 
 ## TODO
 
-Find a reliable solution for the empty-mag reload path so weapons no longer fall back to the newer reload rule when the magazine has been fully depleted.
+~~Find a reliable solution for the empty-mag reload path so weapons no longer fall back to the newer reload rule when the magazine has been fully depleted.~~
+
+The current workaround is treated as the working solution unless SwiftlyS2 exposes a more direct and reliable `weapon_outofammo` hook in the future.
