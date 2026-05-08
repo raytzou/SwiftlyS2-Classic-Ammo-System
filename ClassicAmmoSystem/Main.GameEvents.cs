@@ -86,7 +86,7 @@ namespace ClassicAmmoSystem
             };
         }
 
-        private SwiftlyS2.Shared.GameEvents.IGameEventService.GameEventHandler<EventWeaponFire> WeaponFireHandler()
+        private GameEventHandler<EventWeaponFire> WeaponFireHandler()
         {
             return (@event) =>
             {
@@ -143,7 +143,7 @@ namespace ClassicAmmoSystem
             };
         }
 
-        private SwiftlyS2.Shared.GameEvents.IGameEventService.GameEventHandler<EventItemEquip> ItemEquipHandler()
+        private GameEventHandler<EventItemEquip> ItemEquipHandler()
         {
             return (@event) =>
             {
