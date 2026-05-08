@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using SwiftlyS2.Shared;
 using SwiftlyS2.Shared.Events;
+using SwiftlyS2.Shared.GameEventDefinitions;
 using SwiftlyS2.Shared.Plugins;
 using SwiftlyS2.Shared.SchemaDefinitions;
 
@@ -31,6 +32,12 @@ namespace ClassicAmmoSystem
 
         public override void Unload()
         {
+            Core.GameEvent.UnhookPost<EventWeaponReload>();
+            Core.GameEvent.UnhookPost<EventRoundEnd>();
+            Core.GameEvent.UnhookPost<EventRoundStart>();
+            Core.GameEvent.UnhookPost<EventWeaponFire>();
+            Core.GameEvent.UnhookPost<EventItemEquip>();
+
             if (_serviceProvider is null)
             {
                 Core.Logger.LogWarning("Service Provider is null while unloading plugin.");
@@ -41,6 +48,7 @@ namespace ClassicAmmoSystem
 
             ammoService.ClearReloadSession();
             _serviceProvider?.Dispose();
+            _serviceProvider = null;
         }
 
         private void RegisterServices()
